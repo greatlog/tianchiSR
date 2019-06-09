@@ -13,9 +13,9 @@ parser.add_argument('--num_epochs', type=int, default=20)
 parser.add_argument('--world_dim',type=int, default=3)
 parser.add_argument("--display_fre", type=int, default =50)
 
-parser.add_argument('--img_W', type=int, nargs='+', default= 640)
-parser.add_argument('--img_H', type=int, nargs='+', default= 480)
-parser.add_argument('--crop_size', type=int, default= 128)
+parser.add_argument('--img_W', type=int, nargs='+', default= 480)
+parser.add_argument('--img_H', type=int, nargs='+', default= 270)
+parser.add_argument('--crop_size', type=int, default= [270, 480])
 
 parser.add_argument('--lr', type=float, default=2e-3, help='learning rate')
 parser.add_argument("--beta1", type=float, default = 0.5)
@@ -36,4 +36,4 @@ args.log_dir = os.path.join(args.save_dir,'log')
 if not os.path.exists(args.save_dir):
     os.makedirs(args.save_dir)
 if os.path.exists(args.log_dir):
-    shutil.rmtree(args.log_dir)ss
+    shutil.rmtree(args.log_dir)

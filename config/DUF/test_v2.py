@@ -57,12 +57,12 @@ def test_net(gpu_id, model_path, video_list, timeline, nframes):
         if not osp.exists(result_img_dir):
             os.mkdir(result_img_dir)
         for i in range(nframes//2):
-            img = cv2.imread(imglist[i]) / 255
+            img = cv2.imread(imglist[i])
             img_name = imglist[i].split('/')[-1]
             img = cv2.resize(img, dsize=None, fx=4, fy=4, interpolation = cv2.INTER_CUBIC)
             cv2.imwrite(osp.join(result_img_dir, img_name), img)
             
-            img = cv2.imread(imglist[-i]) / 255
+            img = cv2.imread(imglist[-i]) 
             img_name = imglist[-i].split('/')[-1]
             img = cv2.resize(img, dsize=None, fx=4, fy=4, interpolation = cv2.INTER_CUBIC)
             cv2.imwrite(osp.join(result_img_dir, img_name), img)
@@ -78,9 +78,9 @@ def test_net(gpu_id, model_path, video_list, timeline, nframes):
             w = img.shape[4]
             HR_img = np.zeros(shape=(1,3, h*4, w*4))
             start_row = [_*64 for _ in range(h//64)]
-            start_row[-1] = h - 64
+            start_row.append(h - 64)
             start_col = [_*64 for _ in range(w//64)]
-            start_col[-1] = w - 64
+            start_col.append(w - 64)
             
             for row in start_row:
                 for col in start_col:

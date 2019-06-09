@@ -7,6 +7,20 @@ import time
 import copy
 import os
 
+def Huber(y_true, y_pred, delta=torch.as_tensor(0.01).float().cuda()):
+    delta = torch.as_tensor(delta).float().cuda()
+    abs_error = torch.abs(y_pred - y_true)
+    quadratic = torch.min(abs_error, delta)
+    # The following expression is the same in value as
+    # tf.maximum(abs_error - delta, 0), but importantly the gradient for the
+    # expression when abs_error == delta is 0 (for tf.maximum it would be 1).
+    # This is necessary to avoid doubling the gradient, since there is already a
+    # nonzero contribution to the gradient from the quadratic term.
+    linear = (abs_error - quadratic)
+    losses = 0.5 * quadratic**2 + delta * linear
+    return torch.mean(losses)
+
+
 def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,args):
     
     Iter = 0
@@ -25,18 +39,21 @@ def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,a
             
             gen_img = model(img)
             
-            loss = nn.MSELoss(reduction='mean')(label, gen_img)
-#             loss = torch.mean(((label - gen_img)**2 + 1e-3)**0.5)
+#             loss = nn.MSELoss(reduction = 'mean')(label, gen_img)
+            loss = Huber(gen_img, label)
+            loss_ = torch.mean((gen_img - label)**2)
             loss.backward()
             optimizer.step()
             
             if Iter % args.display_fre == 0:
                 lr = scheduler.get_lr()[-1]
-                print("Loss:{}, lr:{}".format(loss.item(), lr))
-                summery_writer.add_scalar('scaler/loss', loss.item(), Iter)
+                print("Loss:{}, lr:{}".format(loss_.item(), lr))
+                summery_writer.add_scalar('scaler/loss', loss_.item(), Iter)
                 summery_writer.add_scalar('scaler/lr', lr, Iter)
                 summery_writer.add_image('images/LR', torchvision.utils.make_grid(img[:,:,args.nframes//2]), Iter)
-                summery_writer.add_image('images/gen', torchvision.utils.make_grid(gen_img), Iter)
+                gen_img[gen_img>1] = 1
+                gen_img[gen_img<0] = 0
+                summery_writer.add_image('images/gen', torchvision.utils.make_grid(torch.clip(gen_img,0,1)), Iter)
                 summery_writer.add_image('images/HR', torchvision.utils.make_grid(label), Iter)
                 
         

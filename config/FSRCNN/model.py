@@ -24,7 +24,7 @@ class FSRCNN(nn.Module):
         super(FSRCNN, self).__init__()
         
         self.extract_features = nn.Sequential(
-            nn.Conv2d(3, 256, 9, 1, 4),
+            nn.Conv2d(3, 256, 5, 1, 2),
             nn.BatchNorm2d(256),
             nn.PReLU(256),
         )

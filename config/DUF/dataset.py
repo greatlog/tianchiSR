@@ -10,28 +10,30 @@ sys.path.insert(0, '../../')
 from src.data_utils import random_resize, random_flip, random_crop, random_rotate, colorjitter
 from IPython import embed
 import numpy as np
+import pickle
 
 class DataLoader(Dataset):
     def __init__(self, args):
         super(DataLoader, self).__init__()
         self.crop_size = args.crop_size
-        self.group_dir = args.group_dir
         self.nframes = args.nframes
+        self.group_dir = args.group_dir
         
-        self.group_list = glob.glob(osp.join(self.group_dir, '*l'))
-        self.imglist = []
-        for group in self.group_list:
-            video_list = os.listdir(group)
-            for v in video_list:
-                imglist = os.listdir(osp.join(group, v))
-                imglist.sort(key=lambda x:x[:-4])
-                for i in range(0, len(imglist) - self.nframes, self.nframes//2):
-                    lr_path = []
-                    hr_path = []
-                    for j in range(self.nframes):
-                        lr_path.append(osp.join(group, v, imglist[i + j]))
-                        hr_path.append(osp.join(group.replace('_l', '_h_GT'), v.replace('_l', '_h_GT'), imglist[i + j]))
-                    self.imglist.append([lr_path, hr_path])
+        self.imglist = pickle.load(open(osp.join(self.group_dir, 'trainlist.pkl'), 'rb'))
+#         self.group_list = glob.glob(osp.join(self.group_dir, '*l'))
+#         self.imglist = []
+#         for group in self.group_list:
+#             video_list = os.listdir(group)
+#             for v in video_list:
+#                 imglist = os.listdir(osp.join(group, v))
+#                 imglist.sort(key=lambda x:x[:-4])
+#                 for i in range(0, len(imglist) - self.nframes):
+#                     lr_path = []
+#                     hr_path = []
+#                     for j in range(self.nframes):
+#                         lr_path.append(osp.join(group, v, imglist[i + j]))
+#                         hr_path.append(osp.join(group.replace('_l', '_h_GT'), v.replace('_l', '_h_GT'), imglist[i + j]))
+#                     self.imglist.append([lr_path, hr_path])
         random.shuffle(self.imglist)
         self.length = len(self.imglist)
         print("Dataset Length: {}".format(self.length))

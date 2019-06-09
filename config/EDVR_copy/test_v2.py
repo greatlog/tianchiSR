@@ -31,7 +31,7 @@ def parse_args():
 
 def construct_model(model_path, device):
     from modules.EDVR_arch import EDVR
-    model = EDVR(128, args.nframes, 8, 5, 40)
+    model = EDVR(128, args.nframes, 8, 5, 10)
     ckpt = torch.load(model_path)
     new_ckpt  = {}
     for key in ckpt:
@@ -60,12 +60,12 @@ def test_net(gpu_id, model_path, video_list, timeline, nframes):
             img = cv2.imread(imglist[i]) / 255
             img_name = imglist[i].split('/')[-1]
             img = cv2.resize(img, dsize=None, fx=4, fy=4, interpolation = cv2.INTER_CUBIC)
-            cv2.imwrite(osp.join(result_img_dir, img_name), img)
+            cv2.imwrite(osp.join(result_img_dir, img_name), img*255)
             
             img = cv2.imread(imglist[-i]) / 255
             img_name = imglist[-i].split('/')[-1]
             img = cv2.resize(img, dsize=None, fx=4, fy=4, interpolation = cv2.INTER_CUBIC)
-            cv2.imwrite(osp.join(result_img_dir, img_name), img)
+            cv2.imwrite(osp.join(result_img_dir, img_name), img*255)
             
         for i in range(len(imglist) - nframes):
             img = []
@@ -78,9 +78,9 @@ def test_net(gpu_id, model_path, video_list, timeline, nframes):
             w = img.shape[4]
             HR_img = np.zeros(shape=(1,3, h*4, w*4))
             start_row = [_*128 for _ in range(h//128)]
-            start_row[-1] = h - 128
+            start_row.append(h - 128)
             start_col = [_*128 for _ in range(w//128)]
-            start_col[-1] = w - 128
+            start_col.append(w - 128)
             
             for row in start_row:
                 for col in start_col:
