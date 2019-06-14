@@ -19,19 +19,20 @@ if args.phase=='train':
     
     print("constructing model ....")
     model = G(args.nframes)
+    if args.resume:
+        ckpt = torch.load(args.model_path)
+#         new_ckpt  = {}
+#         for key in ckpt:
+#             if not key.startswith('module'):
+#                 new_key  = 'module.' + key
+#             else:
+#                 new_key = key
+#             new_ckpt[new_key] = ckpt[key]
+        model.load_state_dict(ckpt,strict = False)
         
     model = nn.DataParallel(model.to(device), gpuids)
     
-    if args.resume:
-        ckpt = torch.load(args.model_path)
-        new_ckpt  = {}
-        for key in ckpt:
-            if not key.startswith('module'):
-                new_key  = 'module.' + key
-            else:
-                new_key = key
-            new_ckpt[new_key] = ckpt[key]
-        model.load_state_dict(new_ckpt)
+    
     print("model constructed")
     
     summary_writer = SummaryWriter(args.log_dir)

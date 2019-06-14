@@ -11,11 +11,9 @@ parser.add_argument('--ngpu',  type=int, default=1, help='number of GPUs to use'
 parser.add_argument('--num_epochs', type=int, default=20)
 
 parser.add_argument('--world_dim',type=int, default=3)
-parser.add_argument("--display_fre", type=int, default =50)
+parser.add_argument("--display_fre", type=int, default =5)
 
-parser.add_argument('--img_W', type=int, nargs='+', default= 480)
-parser.add_argument('--img_H', type=int, nargs='+', default= 270)
-parser.add_argument('--crop_size', type=int, default= [270, 480])
+parser.add_argument('--crop_size', type=int, default= [260, 470])
 
 parser.add_argument('--lr', type=float, default=2e-3, help='learning rate')
 parser.add_argument("--beta1", type=float, default = 0.5)

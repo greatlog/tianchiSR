@@ -13,7 +13,7 @@ parser.add_argument('--num_epochs', type=int, default=20)
 parser.add_argument('--world_dim',type=int, default=3)
 parser.add_argument("--display_fre", type=int, default =50)
 
-parser.add_argument('--crop_size', type=int, default = [100, 100])
+parser.add_argument('--crop_size', type=int, default = [64, 64])
 
 parser.add_argument('--lr', type=float, default=2e-3, help='learning rate')
 parser.add_argument("--beta1", type=float, default = 0.5)

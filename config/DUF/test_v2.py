@@ -53,6 +53,7 @@ def test_net(gpu_id, model_path, video_list, timeline, nframes):
     for video_name in video_list:
         print('testing  ', video_name) 
         imglist = glob.glob(osp.join(test_LR_dir, video_name, '*.bmp'))
+        imglist.sort(key=lambda x:(x.split('/')[-1][:-4]))
         result_img_dir = osp.join(result_dir, video_name)
         if not osp.exists(result_img_dir):
             os.mkdir(result_img_dir)

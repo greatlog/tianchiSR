@@ -39,8 +39,8 @@ def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,a
             
             gen_img = model(img)
             
-#             loss = nn.MSELoss(reduction = 'mean')(label, gen_img)
-            loss = Huber(gen_img, label)
+            loss = nn.L1Loss(reduction = 'mean')(label, gen_img)
+#             loss = Huber(gen_img, label)
             loss_ = torch.mean((gen_img - label)**2)
             loss.backward()
             optimizer.step()
@@ -50,10 +50,10 @@ def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,a
                 print("Loss:{}, lr:{}".format(loss_.item(), lr))
                 summery_writer.add_scalar('scaler/loss', loss_.item(), Iter)
                 summery_writer.add_scalar('scaler/lr', lr, Iter)
-                summery_writer.add_image('images/LR', torchvision.utils.make_grid(img[:,:,args.nframes//2]), Iter)
+                summery_writer.add_image('images/LR', torchvision.utils.make_grid(img[:,:,args.nframes//2],nrow=4), Iter)
                 gen_img[gen_img>1] = 1
                 gen_img[gen_img<0] = 0
-                summery_writer.add_image('images/gen', torchvision.utils.make_grid(torch.clip(gen_img,0,1)), Iter)
+                summery_writer.add_image('images/gen', torchvision.utils.make_grid(gen_img,nrow=4), Iter)
                 summery_writer.add_image('images/HR', torchvision.utils.make_grid(label), Iter)
                 
         

@@ -27,7 +27,7 @@ def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,a
             loss = []
             total_loss = 0.0
             for gen_img in gen_imgs:
-                tmp = torch.mean((gen_img - label)**2)
+                tmp = nn.L1Loss(reduction='mean')(gen_img, label)
                 loss.append(tmp)
                 total_loss += tmp
             total_loss.backward()

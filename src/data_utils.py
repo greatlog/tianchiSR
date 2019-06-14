@@ -71,24 +71,50 @@ def random_rotate(img, label, max_angle=40):
 
 def random_flip(img, label):
         if np.random.rand() > 0.5:
-            img = cv2.flip(img, 1)
-            label = cv2.flip(label, 1)
+            img = img[:,::-1] - np.zeros_like(img)
+            label = label[:,::-1] - np.zeros_like(label)
             return img, label
         else:
             return img, label
 
-def random_crop(img, label, crop_size):
+def random_crop_new(img, label, crop_size, h_pad=20, w_pad = 50):
+    height1, width1 = img.shape[:2]
+    height2, width2 = label.shape[:2]
+    
+    center_1 = (height1//2, width1//2)
+    center_2 = (height2//2, width2//2)
+    
+    center_perb_max = min(height1 - crop_size[0] - h_pad*2, width1 - crop_size[1] - w_pad*2)
+    
+    random_x = int((np.random.rand() - 0.5) * center_perb_max)
+    random_y = int((np.random.rand() - 0.5) * center_perb_max)
+    
+    st_h = center_1[0] - crop_size[0]//2 - random_x
+    st_w = center_1[1] - crop_size[1]//2 - random_y
+    ed_h = center_1[0] + crop_size[0]//2 - random_x
+    ed_w = center_1[1] + crop_size[1]//2 - random_y
+    img = img[st_h:ed_h, st_w:ed_w]
+    
+    st_h = center_2[0] - crop_size[0]//2*4 - random_x*4
+    st_w = center_2[1] - crop_size[1]//2*4 - random_y*4
+    ed_h = center_2[0] + crop_size[0]//2*4 - random_x*4
+    ed_w = center_2[1] + crop_size[1]//2*4 - random_y*4
+    label = label[st_h:ed_h, st_w:ed_w]
+    
+    return img, label
+
+def random_crop(img, label, crop_size, h_pad=20, w_pad = 50):
     height1, width1 = img.shape[:2]
     height2, width2 = label.shape[:2]
     
     random_x = np.random.rand()
     random_y = np.random.rand()
     
-    lp_h = int((height1 - crop_size[0]) * random_x)
-    lp_w = int((width1 - crop_size[1]) * random_y)
-    img = img[lp_h:lp_h + crop_size[0], lp_w:lp_w + crop_size[1]]
+    lp_h = int((height1 - crop_size[0] - h_pad*2) * random_x)
+    lp_w = int((width1 - crop_size[1] - w_pad*2) * random_y)
+    img = img[lp_h + h_pad:lp_h + h_pad + crop_size[0], lp_w + w_pad:lp_w + w_pad + crop_size[1]]
     
-    lp_h = int((height2 - crop_size[0]*4) * random_x)
-    lp_w = int((width2 - crop_size[1]*4) * random_y)
-    label = label[lp_h:lp_h + crop_size[0]*4, lp_w:lp_w + crop_size[1]*4]
+    lp_h = int((height2 - crop_size[0]*4 - h_pad*8) * random_x)
+    lp_w = int((width2 - crop_size[1]*4 - w_pad*8) * random_y)
+    label = label[lp_h + h_pad*4 :lp_h +h_pad*4+ crop_size[0]*4, lp_w+w_pad*4:lp_w+w_pad*4 + crop_size[1]*4]
     return img, label

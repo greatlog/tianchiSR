@@ -18,7 +18,7 @@ if args.phase=='train':
     device = torch.device("cuda:0")
     
     print("constructing model ....")
-    model = EDVR(128, args.nframes, 8, 5, 10)
+    model = EDVR(128, args.nframes, 8, 5, 40, predeblur=True)
         
     model = nn.DataParallel(model.to(device), gpuids)
     
@@ -31,9 +31,14 @@ if args.phase=='train':
             else:
                 new_key = key
             new_ckpt[new_key] = ckpt[key]
-        model.load_state_dict(new_ckpt)
+        model.load_state_dict(new_ckpt, strict=False)
     print("model constructed")
     
+    deblur_parameters = {}
+    for key, value in model.named_parameters():
+        if not ('pre_deblur' in key):
+            value.requires_grad = False
+            
     summary_writer = SummaryWriter(args.log_dir)
 
     optimizer = torch.optim.Adam(model.parameters(), lr = args.lr)

@@ -7,7 +7,7 @@ import os.path as osp
 import glob
 import sys
 sys.path.insert(0, '../../')
-from src.data_utils import random_resize, random_flip, random_crop, random_rotate, colorjitter
+from src.data_utils import random_resize, random_flip, random_crop_new, random_rotate, colorjitter
 from IPython import embed
 
 class DataLoader(Dataset):
@@ -34,7 +34,7 @@ class DataLoader(Dataset):
 #         img, label = colorjitter(img, label)
 #         img, label = random_resize(img, label)
 #         img, label = random_rotate(img, label)
-        img, label = random_crop(img, label, self.crop_size)
+        img, label = random_crop_new(img, label, self.crop_size,0,0)
         img, label = random_flip(img, label)
         return img, label
         
@@ -42,6 +42,8 @@ class DataLoader(Dataset):
         index = index % self.length
         img = cv2.imread(self.imglist[index][0])
         label = cv2.imread(self.imglist[index][1])
+#         img = img[:self.crop_size[0],:self.crop_size[1]]
+#         label = label[:self.crop_size[0] * 4,:self.crop_size[1]*4]
         img, label = self.aug(img, label)
         img  = img.transpose(2, 0, 1) / 255
         label = label.transpose(2, 0, 1) / 255

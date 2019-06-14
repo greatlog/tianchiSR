@@ -7,7 +7,7 @@ import os.path as osp
 import glob
 import sys
 sys.path.insert(0, '../../')
-from src.data_utils import random_resize, random_flip, random_crop, random_rotate, colorjitter
+from src.data_utils import random_resize, random_flip, random_crop_new, random_rotate, colorjitter
 from IPython import embed
 import numpy as np
 import pickle
@@ -19,7 +19,7 @@ class DataLoader(Dataset):
         self.nframes = args.nframes
         self.group_dir = args.group_dir
         
-        self.imglist = pickle.load(open(osp.join(self.group_dir, 'trainlist.pkl'), 'rb'))
+        self.imglist = pickle.load(open(osp.join(self.group_dir, 'trainlist_aug.pkl'), 'rb'))
 #         self.group_list = glob.glob(osp.join(self.group_dir, '*l'))
 #         self.imglist = []
 #         for group in self.group_list:
@@ -55,7 +55,7 @@ class DataLoader(Dataset):
             hr_img.append(cv2.imread(self.imglist[index][1][i]))
         lr_img = np.stack(lr_img, -1)
         hr_img = np.stack(hr_img, -1)
-        lr_img, hr_img = random_crop(lr_img, hr_img, self.crop_size)
+        lr_img, hr_img = random_crop_new(lr_img, hr_img, self.crop_size)
         lr_img  = lr_img.transpose(2, 3, 0, 1) / 255
         hr_img = hr_img.transpose(2, 3, 0, 1) / 255
         hr_img = hr_img[:,self.nframes//2]

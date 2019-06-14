@@ -35,8 +35,8 @@ def train_model(model, optimizer,scheduler, dataloader, summery_writer, device,a
                 summery_writer.add_scalar('scaler/loss', loss.item(), Iter)
                 summery_writer.add_scalar('scaler/lr', lr, Iter)
                 summery_writer.add_image('images/LR', torchvision.utils.make_grid(img), Iter)
-                summery_writer.add_image('images/gen', torchvision.utils.make_grid(gen_img), Iter)
-                summery_writer.add_image('images/HR', torchvision.utils.make_grid(label), Iter)
+                summery_writer.add_image('images/gen', torchvision.utils.make_grid(gen_img,nrow=2), Iter)
+                summery_writer.add_image('images/HR', torchvision.utils.make_grid(label,nrow=2), Iter)
                 
         
         # Each epoch has a training and validation phase
