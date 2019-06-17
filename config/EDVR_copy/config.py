@@ -26,7 +26,7 @@ parser.add_argument('--log_dir', default='', type=str, metavar='PATH', help='pat
 parser.add_argument('--resume', action='store_true')
 
 parser.add_argument('--phase', default='train',type=str)
-parser.add_argument('--nframes', type=int, default = 7)
+parser.add_argument('--nframes', type=int, default = 5)
 
 args = parser.parse_args()
 gpuids = [int(_) for _ in range(args.ngpu)]

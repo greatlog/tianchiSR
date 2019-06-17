@@ -34,10 +34,9 @@ if args.phase=='train':
         model.load_state_dict(new_ckpt, strict=False)
     print("model constructed")
     
-    deblur_parameters = {}
-    for key, value in model.named_parameters():
-        if not ('pre_deblur' in key):
-            value.requires_grad = False
+#     for key, value in model.named_parameters():
+#         if not ('pre_deblur' in key):
+#             value.requires_grad = False
             
     summary_writer = SummaryWriter(args.log_dir)
 

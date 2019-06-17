@@ -25,13 +25,13 @@ def parse_args():
     parser.add_argument('--test_HR_dir', type=str, default = '../../dataset/test_imgs/youku_00150_00199_h_GT')
     parser.add_argument('--model_path', type = str, default = None)
     parser.add_argument('--ngpu', type = int, default = 1)
-    parser.add_argument('--nframes', type = int, default = 7)
+    parser.add_argument('--nframes', type = int, default = 5)
     args = parser.parse_args()
     return args    
 
 def construct_model(model_path, device):
     from modules.EDVR_arch import EDVR
-    model = EDVR(128, args.nframes, 8, 5, 40)
+    model = EDVR(128, args.nframes, 8, 5, 40, predeblur=True)
     ckpt = torch.load(model_path)
     new_ckpt  = {}
     for key in ckpt:
@@ -122,7 +122,7 @@ def compute_vmaf(timeline):
     ms_ssim = 0.0
     
     total_result = osp.join(result_dir,'total_result{}.txt'.format(timeline))
-    result_file = open(total_result, 'r')
+    result_file = open(total_result, 'w')
 
     for f in results_xml:
         dom = xml.dom.minidom.parse(f)
@@ -156,9 +156,8 @@ if __name__=='__main__':
     
     video_list  = []
     for _ in os.listdir(test_LR_dir):
-        if '158' in _:
-            if osp.isdir(osp.join(test_LR_dir, _ )):
-                video_list.append(_)
+        if osp.isdir(osp.join(test_LR_dir, _ )):
+            video_list.append(_)
             
     sub_video_list = []
     stride = len(video_list)//args.ngpu
