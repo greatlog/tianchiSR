@@ -13,19 +13,20 @@ parser.add_argument('--num_epochs', type=int, default=20)
 parser.add_argument('--world_dim',type=int, default=3)
 parser.add_argument("--display_fre", type=int, default =10)
 
-parser.add_argument('--crop_size', type=int, default= [270, 480])
+parser.add_argument('--crop_size', type=int, default = [64, 64])
 
 parser.add_argument('--lr', type=float, default=2e-3, help='learning rate')
 parser.add_argument("--beta1", type=float, default = 0.5)
 parser.add_argument('--gamma', type=float, default=0.9)
 
-parser.add_argument('--group_dir', default='/data/tianchiSR/dataset/train_imgs/', type=str, metavar='PATH')
+parser.add_argument('--group_dir', default='/data/tianchiSR/dataset/', type=str, metavar='PATH')
 parser.add_argument('--model_path', default='result/', type=str, metavar='PATH')
 parser.add_argument('--save_dir', default='result/', type=str, metavar='PATH', help='path to validation images')
 parser.add_argument('--log_dir', default='', type=str, metavar='PATH', help='path to validation images')
 parser.add_argument('--resume', action='store_true')
 
 parser.add_argument('--phase', default='train',type=str)
+parser.add_argument('--nframes', type=int, default = 7)
 
 args = parser.parse_args()
 gpuids = [int(_) for _ in range(args.ngpu)]

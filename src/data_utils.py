@@ -103,6 +103,33 @@ def random_crop_new(img, label, crop_size, h_pad=20, w_pad = 50):
     
     return img, label
 
+def random_crop_edges(img, label, edges, crop_size, h_pad=20, w_pad = 50):
+    height1, width1 = img.shape[:2]
+    height2, width2 = label.shape[:2]
+    
+    center_1 = (height1//2, width1//2)
+    center_2 = (height2//2, width2//2)
+    
+    center_perb_max = min(height1 - crop_size[0] - h_pad*2, width1 - crop_size[1] - w_pad*2)
+    
+    random_x = int((np.random.rand() - 0.5) * center_perb_max)
+    random_y = int((np.random.rand() - 0.5) * center_perb_max)
+    
+    st_h = center_1[0] - crop_size[0]//2 - random_x
+    st_w = center_1[1] - crop_size[1]//2 - random_y
+    ed_h = center_1[0] + crop_size[0]//2 - random_x
+    ed_w = center_1[1] + crop_size[1]//2 - random_y
+    img = img[st_h:ed_h, st_w:ed_w]
+    edges = edges[st_h:ed_h, st_w:ed_w]
+    
+    st_h = center_2[0] - crop_size[0]//2*4 - random_x*4
+    st_w = center_2[1] - crop_size[1]//2*4 - random_y*4
+    ed_h = center_2[0] + crop_size[0]//2*4 - random_x*4
+    ed_w = center_2[1] + crop_size[1]//2*4 - random_y*4
+    label = label[st_h:ed_h, st_w:ed_w]
+    
+    return img, label, edges
+
 def random_crop(img, label, crop_size, h_pad=20, w_pad = 50):
     height1, width1 = img.shape[:2]
     height2, width2 = label.shape[:2]
