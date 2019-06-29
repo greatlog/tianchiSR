@@ -7,10 +7,31 @@ import os.path as osp
 import glob
 import sys
 sys.path.insert(0, '../../')
+import pyflow
 from src.data_utils import random_resize, random_flip, random_crop_new, random_rotate, colorjitter
 from IPython import embed
 import numpy as np
 import pickle
+
+def get_flow(im1, im2):
+    im1 = np.array(im1)
+    im2 = np.array(im2)
+    im1 = im1.astype(float) / 255.
+    im2 = im2.astype(float) / 255.
+    
+    # Flow Options:
+    alpha = 0.012
+    ratio = 0.75
+    minWidth = 20
+    nOuterFPIterations = 7
+    nInnerFPIterations = 1
+    nSORIterations = 30
+    colType = 0  # 0 or default:RGB, 1:GRAY (but pass gray image with shape (h,w,1))
+    
+    u, v, im2W = pyflow.coarse2fine_flow(im1, im2, alpha, ratio, minWidth, nOuterFPIterations, nInnerFPIterations,nSORIterations, colType)
+    flow = np.concatenate((u[..., None], v[..., None]), axis=2)
+    #flow = rescale_flow(flow,0,1)
+    return flow
 
 class DataLoader(Dataset):
     def __init__(self, args):
@@ -20,28 +41,11 @@ class DataLoader(Dataset):
         self.nframes = args.nframes
         
         self.imglist = pickle.load(open(osp.join(self.group_dir, 'trainlist_aug.pkl'), 'rb'))
-#         self.group_list = glob.glob(osp.join(self.group_dir, '*l'))
-#         for group in self.group_list:
-#             video_list = os.listdir(group)
-#             for v in video_list:
-#                 imglist = os.listdir(osp.join(group, v))
-#                 imglist.sort(key=lambda x:x[:-4])
-#                 print(imglist)
-#                 for i in range(0, len(imglist) - self.nframes, self.nframes//2):
-#                     lr_path = []
-#                     hr_path = []
-#                     for j in range(self.nframes):
-#                         lr_path.append(osp.join(group, v, imglist[i + j]))
-#                         hr_path.append(osp.join(group.replace('_l', '_h_GT'), v.replace('_l', '_h_GT'), imglist[i + j]))
-#                     self.imglist.append([lr_path, hr_path])
         random.shuffle(self.imglist)
         self.length = len(self.imglist)
         print("Dataset Length: {}".format(self.length))
         
     def aug(self, img, label):
-#         img, label = colorjitter(img, label)
-#         img, label = random_resize(img, label)
-#         img, label = random_rotate(img, label)s
         img, label = random_crop(img, label, self.crop_size)
         img, label = random_flip(img, label)
         return img, label
@@ -52,15 +56,23 @@ class DataLoader(Dataset):
         hr_img = []
         for i in range(self.nframes):
             lr_img.append(cv2.imread(self.imglist[index][0][i]))
-            hr_img.append(cv2.imread(self.imglist[index][1][i]))
+
         lr_img = np.stack(lr_img, -1)
-        hr_img = np.stack(hr_img, -1)
+        hr_img = cv2.imread(self.imglist[index][1][self.nframes - 1])
+        
         lr_img, hr_img = random_crop_new(lr_img, hr_img, self.crop_size)
         lr_img, hr_img = random_flip(lr_img, hr_img)
-        lr_img  = lr_img.transpose(3, 2, 0, 1) / 255
-        hr_img = hr_img.transpose(3, 2, 0, 1) / 255
-        hr_img = hr_img[self.nframes//2]
-        return lr_img, hr_img
+        lr_target = lr_img[:,:,:,-1]
+        bicubic  = cv2.resize(lr_target, dsize=None, fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
+        flow = [get_flow(lr_target,lr_img[:,:,:,j]) for j in range(self.nframes-1)]
+        
+        lr_target  = lr_target.transpose(2, 0, 1) / 255
+        hr_img = hr_img.transpose(2, 0, 1) / 255
+        neighbor = [lr_img[:,:,:,j].transpose(2,0,1)/255 for j in range(self.nframes-1)]
+        flow = [j.transpose(2,0,1) for j in flow]
+        bicubic = bicubic.transpose(2, 0 ,1) / 255
+        
+        return lr_target, hr_img, neighbor, flow, bicubic
     
     def __len__(self):
         return self.length
